@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ROOTS | 3D Portfolio</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      overflow-x: hidden;
+      background: #07110d;
+      color: #edffe8;
+      font-family: Arial, sans-serif;
+    }
+    #scene {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      width: 100%;
+      height: 100%;
+    }
+    .content {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      padding: 12vh 8vw;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      pointer-events: none;
+      background: linear-gradient(
+        90deg,
+        rgba(3, 12, 7, .9),
+        rgba(3, 12, 7, .3) 75%,
+        transparent
+      );
+    }
+    h1 {
+      margin: 0;
+      font-size: clamp(60px, 11vw, 140px);
+      line-height: .85;
+      letter-spacing: -.08em;
+    }
+    h1 span {
+      display: block;
+      color: #b5ff91;
+      font-family: Georgia, serif;
+      font-weight: normal;
+      font-style: italic;
+      margin-top: 15px;
+    }
+    p {
+      max-width: 400px;
+      color: #c0d4c0;
+      line-height: 1.8;
+    }
+    a {
+      pointer-events: auto;
+      display: inline-block;
+      width: fit-content;
+      margin-top: 20px;
+      padding: 15px 22px;
+      background: #b5ff91;
+      color: #07110d;
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: bold;
+      letter-spacing: .12em;
+    }
+    .work {
+      position: relative;
+      z-index: 1;
+      padding: 100px 8vw;
+      background: rgba(5, 18, 10, .8);
+    }
+    .work h2 {
+      font-size: clamp(36px, 6vw, 70px);
+    }
+    .projects {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+    }
+    .project {
+      border: 1px solid #35513a;
+      background: rgba(14, 36, 20, .8);
+      padding: 25px;
+      min-height: 150px;
+    }
+    .project p { font-size: 13px; }
+    @media (max-width: 650px) {
+      .projects { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="scene"></canvas>
+
+  <main>
+    <section class="content">
+      <p>CREATIVE PORTFOLIO · 2026</p>
+      <h1>GROW<span>your world.</span></h1>
+      <p>
+        A digital world inspired by nature,
+        movement and imagination.
+      </p>
+      <a href="#work">EXPLORE MY WORK ↘</a>
+    </section>
+
+    <section class="work" id="work">
+      <p>01 / SELECTED WORK</p>
+      <h2>Ideas in bloom.</h2>
+      <div class="projects">
+        <article class="project">
+          <h3>Living Forms</h3>
+          <p>3D modeling and look development.</p>
+        </article>
+        <article class="project">
+          <h3>Motion Studies</h3>
+          <p>Animation and motion experiments.</p>
+        </article>
+        <article class="project">
+          <h3>Green Futures</h3>
+          <p>Creative concepts and worldbuilding.</p>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <script type="module">
+    import * as THREE from
+      'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+
+    const scene = new THREE.Scene();
+    scene.fog = new THREE.FogExp2(0x07110d, 0.035);
+
+    const camera = new THREE.PerspectiveCamera(
+      45, innerWidth / innerHeight, 0.1, 100
+    );
+    camera.position.set(0, 2.5, 12);
+
+    const renderer = new THREE.WebGLRenderer({
+      canvas: document.querySelector('#scene'),
+      antialias: true,
+      alpha: true
+    });
+    renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+    renderer.setSize(innerWidth, innerHeight);
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+    scene.add(new THREE.HemisphereLight(0xcaffd0, 0x15251a, 2));
+
+    const light = new THREE.DirectionalLight(0xd8ffbd, 3);
+    light.position.set(5, 8, 5);
+    scene.add(light);
+
+    const glow = new THREE.PointLight(0x55ff88, 30, 20);
+    glow.position.set(-3, 4, -2);
+    scene.add(glow);
+
+    const tree = new THREE.Group();
+    scene.add(tree);
+
+    const trunk = new THREE.Mesh(
+      new THREE.CylinderGeometry(.15, .4, 5, 10),
+      new THREE.MeshStandardMaterial({
+        color: 0x65482b,
+        roughness: .9
+      })
+    );
+    trunk.position.y = 1.5;
+    tree.add(trunk);
+
+    const leafColors = [
+      0x205b31, 0x367d43, 0x70aa53, 0xb5e879
+    ];
+    const leafGeometry = new THREE.IcosahedronGeometry(1, 1);
+    const leaves = [];
+
+    function addLeaf(x, y, z, size) {
+      const material = new THREE.MeshStandardMaterial({
+        color: leafColors[
+          Math.floor(Math.random() * leafColors.length)
+        ],
+        roughness: .75
+      });
+
+      const leaf = new THREE.Mesh(leafGeometry, material);
+      leaf.position.set(x, y, z);
+      leaf.scale.set(
+        size * (0.8 + Math.random() * .6),
+        size,
+        size * (0.8 + Math.random() * .5)
+      );
+      leaf.rotation.set(Math.random() * 3, Math.random() * 3, 0);
+      tree.add(leaf);
+
+      leaves.push({
+        mesh: leaf,
+        phase: Math.random() * Math.PI * 2
+      });
+    }
+
+    // Branches
+    function branch(x, y, z, length, angle) {
+      const mesh = new THREE.Mesh(
+        new THREE.CylinderGeometry(.035, .11, length, 7),
+        new THREE.MeshStandardMaterial({ color: 0x745432 })
+      );
+      mesh.position.set(x, y, z);
+      mesh.rotation.z = angle;
+      tree.add(mesh);
+    }
+
+    for (let i = 0; i < 9; i++) {
+      const y = 1.5 + i * .4;
+      const side = i % 2 ? 1 : -1;
+      branch(side * .65, y, 0, 1.8, side * -.7);
+    }
+
+    // Organic canopy
+    for (let i = 0; i < 210; i++) {
+      const y = 3 + Math.random() * 3.4;
+      const spread = Math.sin(
+        ((y - 3) / 3.4) * Math.PI
+      ) * 2.3 + .35;
+
+      const angle = Math.random() * Math.PI * 2;
+      const radius = Math.random() * spread;
+
+      addLeaf(
+        Math.cos(angle) * radius,
+        y,
+        Math.sin(angle) * radius * .65,
+        .2 + Math.random() * .42
+      );
+    }
+
+    // Glowing floating particles
+    const count = 300;
+    const points = new Float32Array(count * 3);
+
+    for (let i = 0; i < count; i++) {
+      points[i * 3] = (Math.random() - .5) * 18;
+      points[i * 3 + 1] = Math.random() * 10 - 1;
+      points[i * 3 + 2] = (Math.random() - .5) * 8;
+    }
+
+    const particleGeometry = new THREE.BufferGeometry();
+    particleGeometry.setAttribute(
+      'position',
+      new THREE.BufferAttribute(points, 3)
+    );
+
+    const particles = new THREE.Points(
+      particleGeometry,
+      new THREE.PointsMaterial({
+        color: 0xb8ff8b,
+        size: .045,
+        transparent: true,
+        opacity: .8,
+        blending: THREE.AdditiveBlending
+      })
+    );
+    scene.add(particles);
+
+    let mouseX = 0;
+    let mouseY = 0;
+
+    addEventListener('pointermove', e => {
+      mouseX = (e.clientX / innerWidth - .5) * 1.2;
+      mouseY = (e.clientY / innerHeight - .5) * .5;
+    });
+
+    addEventListener('resize', () => {
+      camera.aspect = innerWidth / innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(innerWidth, innerHeight);
+    });
+
+    const clock = new THREE.Clock();
+
+    renderer.setAnimationLoop(() => {
+      const t = clock.getElapsedTime();
+
+      tree.position.x = 1.1 + mouseX * .3;
+      tree.rotation.y = Math.sin(t * .2) * .12 + mouseX * .15;
+      tree.rotation.z = Math.sin(t * .5) * .012;
+      tree.position.y = -.5 + Math.sin(t * .6) * .06;
+
+      leaves.forEach(({ mesh, phase }) => {
+        mesh.rotation.z = Math.sin(t + phase) * .04;
+        mesh.rotation.x = Math.cos(t * .8 + phase) * .04;
+      });
+
+      camera.position.x +=
+        (mouseX * .35 - camera.position.x) * .025;
+      camera.position.y +=
+        (2.5 - mouseY - camera.position.y) * .025;
+
+      camera.lookAt(0, 2.2, 0);
+      glow.intensity = 27 + Math.sin(t * 1.5) * 5;
+
+      renderer.render(scene, camera);
+    });
+  </script>
+</body>
+</html>
